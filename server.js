@@ -7,21 +7,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// TVOJA STATIČKA ADRESA (ovde upiši tvoj pravi statički IP)
-const STATIC_IP = "185.103.136.132"; 
+// Umesto upisivanja IP adrese ovde, koristimo "šifru" koju ćemo podesiti na Renderu
+const STATIC_IP = process.env.MY_NODE_IP;
 
 app.get('/proxy/:port', async (req, res) => {
+    // Ako zaboraviš da podesiš varijablu na Renderu, javiće ovu grešku
+    if (!STATIC_IP) {
+        return res.status(500).json({ greska: "IP adresa nije konfigurisana na serveru." });
+    }
+
     const port = req.params.port;
     const ciljniURL = `http://${STATIC_IP}:${port}`;
-    
+   
     try {
         const odgovor = await axios.get(ciljniURL, { timeout: 8000 });
         res.json(odgovor.data);
     } catch (greska) {
-        res.status(500).json({ 
-            greska: "Čvor nedostupan na statičkoj adresi", 
+        res.status(500).json({
+            greska: "Čvor nedostupan na statičkoj adresi",
             detalji: greska.message,
-            pokusao_na: ciljniURL 
+            pokusao_na: ciljniURL
         });
     }
 });
