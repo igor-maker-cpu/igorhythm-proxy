@@ -7,21 +7,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// KLJUČNA PROMENA: Koristimo GET i parametar :port
+// TVOJA STATIČKA ADRESA (ovde upiši tvoj pravi statički IP)
+const STATIC_IP = "185.103.136.132"; 
+
 app.get('/proxy/:port', async (req, res) => {
     const port = req.params.port;
-    // TARGET_IP mora biti tvoj javni IP (onaj sa whatsmyip.org)
-    // Možeš ga upisati direktno ovde umesto process.env.TARGET_IP ako ti je lakše
-    const targetIp = process.env.TARGET_IP || "TVOJ_JAVNI_IP_OVDE"; 
-    
-    const ciljniURL = `http://${targetIp}:${port}`;
+    const ciljniURL = `http://${STATIC_IP}:${port}`;
     
     try {
         const odgovor = await axios.get(ciljniURL, { timeout: 8000 });
         res.json(odgovor.data);
     } catch (greska) {
         res.status(500).json({ 
-            greska: "Čvor nedostupan", 
+            greska: "Čvor nedostupan na statičkoj adresi", 
             detalji: greska.message,
             pokusao_na: ciljniURL 
         });
